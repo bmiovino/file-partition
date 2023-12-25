@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace FilePartitioner;
@@ -25,23 +27,6 @@ public partial class FilePartitioner<T> where T : class, new()
         _baseDirectory = baseDirectory;
     }
 
-    public PartitionActionStatus SetBoundaries(int minIndex, int maxIndex)
-    {
-        var res = new PartitionActionStatus();
-
-        if (minIndex >= 0 && maxIndex >= 0 && minIndex <= maxIndex)
-        {
-            MinIndex = minIndex;
-            MaxIndex = maxIndex;
-            res.Status = PartitionActionStatus.ParitionStatusEnum.Success;
-            return res;
-        }
-
-        res.Status = PartitionActionStatus.ParitionStatusEnum.Error;
-        res.Message = $"Boundary indices are invalid : min-index: {minIndex}, max-index: {maxIndex}";
-        return res;
-    }
-
     public PartitionActionStatus WriteSinglePartition(IEnumerable<T> data)
     {
         return WritePartitions(data, data.Count());
@@ -53,10 +38,8 @@ public partial class FilePartitioner<T> where T : class, new()
 
         try
         {
-            var res = SetBoundaries(0, data.Count());
-            if (res.Status != PartitionActionStatus.ParitionStatusEnum.Success)
-                throw new Exception(res.Message);
-
+            MinIndex = 0;
+            MaxIndex = data.Count();
             NumberOfPartitions = (int)Math.Ceiling((double)data.Count() / boundarySize);
 
             for (int i = 0; i < NumberOfPartitions; i++)
@@ -85,13 +68,22 @@ public partial class FilePartitioner<T> where T : class, new()
         return writeResult;
     }
 
-    public PartitionActionStatus ReadPartition(int partitionNumber)
+    public PartitionReadResult<T> ReadPartition(int partitionNumber)
     {
         if(!_universalBoundariesSet)
         {
             ScanBaseDirectory();
+            _universalBoundariesSet = true;
         }
 
+        if (partitionNumber < 0 || partitionNumber >= NumberOfPartitions)
+            return new PartitionReadResult<T>(PartitionActionStatus.ParitionStatusEnum.Error, "Partition index out of range or invalid.");
+        
+        var partitionRecord = _partitionRecords[partitionNumber];
+        var partitionRecordFilePath = GetPartitionFilePath(partitionRecord.MinIndex, partitionRecord.MaxIndex);
+        var data = _fileReaderWriter.Read(partitionRecordFilePath);
+
+        return new PartitionReadResult<T>(PartitionActionStatus.ParitionStatusEnum.Success, "") { Data = data };
     }
 
     public string GetPartitionFilePath(int minIndex, int maxIndex)
@@ -104,8 +96,37 @@ public partial class FilePartitioner<T> where T : class, new()
         return $"{parts[0]}_{minIndex}_{maxIndex}.{parts[1]}";
     }
 
+    private Regex _partitionFileNameRegex = new Regex(@".*_(?<minindex>\d*)_(?<maxindex>\d*)[.].*", RegexOptions.Compiled | RegexOptions.Singleline);
+
     private void ScanBaseDirectory()
     {
+        var files = Directory.GetFiles(_baseDirectory, _baseFileName + "*");
 
+        var partitionRecords = new List<PartitionRecord>();
+
+        foreach (var file in files)
+        {
+            var match = _partitionFileNameRegex.Match(file);
+
+            if (match.Success)
+            {
+                var partitionRecord = new PartitionRecord();
+                partitionRecord.MinIndex = int.Parse(match.Groups["minindex"].Value);
+                partitionRecord.MaxIndex = int.Parse(match.Groups["maxindex"].Value);
+                partitionRecords.Add(partitionRecord);
+            }
+        }
+
+        if (partitionRecords.Count == 0)
+            throw new Exception("No partition files were found.");
+
+        int i = 0;
+        partitionRecords = partitionRecords.OrderBy(i => i.MinIndex).ToList();
+        partitionRecords.ForEach(r => { r.Number = i++; });
+
+        _partitionRecords = partitionRecords.ToDictionary(i => i.Number, i => i);
+
+        MinIndex = _partitionRecords[0].MinIndex;
+        MaxIndex = _partitionRecords[_partitionRecords.Count - 1].MaxIndex;
     }
 }
