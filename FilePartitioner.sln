@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilePartitioner", "FilePartitioner\FilePartitioner.csproj", "{755733D4-BFB2-4DA8-A922-2F68FF26A872}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilePartitioner", "FilePartitioner\FilePartitioner.csproj", "{755733D4-BFB2-4DA8-A922-2F68FF26A872}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilePartitionerTest", "FilePartitionerTest\FilePartitionerTest.csproj", "{67342604-50A4-49B3-B8B6-69B353541A45}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{755733D4-BFB2-4DA8-A922-2F68FF26A872}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{755733D4-BFB2-4DA8-A922-2F68FF26A872}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{755733D4-BFB2-4DA8-A922-2F68FF26A872}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67342604-50A4-49B3-B8B6-69B353541A45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67342604-50A4-49B3-B8B6-69B353541A45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67342604-50A4-49B3-B8B6-69B353541A45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67342604-50A4-49B3-B8B6-69B353541A45}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
