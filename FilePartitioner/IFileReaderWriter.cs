@@ -1,6 +1,5 @@
 ﻿namespace FilePartitioner;
 
-
 public interface IFileReaderWriter<T> where T : class, new()
 { 
     public List<T> Read(string filepath);

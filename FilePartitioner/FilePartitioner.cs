@@ -18,13 +18,15 @@ public partial class FilePartitioner<T> where T : class, new()
     private bool _universalBoundariesSet = false;
     private string _baseFileName;
     private string _baseDirectory;
+    private string _fileExtension;
     private Dictionary<int, PartitionRecord> _partitionRecords = new();
 
-    public FilePartitioner(IFileReaderWriter<T> fileReaderWriter, string baseFileName, string baseDirectory)
+    public FilePartitioner(IFileReaderWriter<T> fileReaderWriter, string baseDirectory, string baseFileName, string fileExtension)
     {
         _fileReaderWriter = fileReaderWriter;
         _baseFileName = baseFileName;
         _baseDirectory = baseDirectory;
+        _fileExtension = fileExtension;
     }
 
     public PartitionActionStatus WriteSinglePartition(IEnumerable<T> data)
@@ -39,7 +41,7 @@ public partial class FilePartitioner<T> where T : class, new()
         try
         {
             MinIndex = 0;
-            MaxIndex = data.Count();
+            MaxIndex = data.Count() - 1;
             NumberOfPartitions = (int)Math.Ceiling((double)data.Count() / boundarySize);
 
             for (int i = 0; i < NumberOfPartitions; i++)
@@ -58,6 +60,8 @@ public partial class FilePartitioner<T> where T : class, new()
             }
 
             _universalBoundariesSet = true;
+
+            writeResult.Status = PartitionActionStatus.ParitionStatusEnum.Success;
         }
         catch (Exception e)
         {
@@ -88,19 +92,14 @@ public partial class FilePartitioner<T> where T : class, new()
 
     public string GetPartitionFilePath(int minIndex, int maxIndex)
     {
-        var parts = _baseFileName.Split(".");
-
-        if (parts.Length > 2)
-            throw new Exception("Only supports one dot in the file name before the extension.");
-
-        return $"{parts[0]}_{minIndex}_{maxIndex}.{parts[1]}";
+        return $"{_baseDirectory.TrimEnd('\\')}\\{_baseFileName}_{minIndex}_{maxIndex}.{_fileExtension}";
     }
 
     private Regex _partitionFileNameRegex = new Regex(@".*_(?<minindex>\d*)_(?<maxindex>\d*)[.].*", RegexOptions.Compiled | RegexOptions.Singleline);
 
     private void ScanBaseDirectory()
     {
-        var files = Directory.GetFiles(_baseDirectory, _baseFileName + "*");
+        var files = Directory.GetFiles(_baseDirectory, _baseFileName + "_*");
 
         var partitionRecords = new List<PartitionRecord>();
 
