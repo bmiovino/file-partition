@@ -9,18 +9,39 @@ using System.Threading.Tasks;
 
 namespace FilePartitioner;
 
+/// <summary>
+/// Local disk persistent data partitioner.  For use in long running processes to 
+/// enable a more graceful failure and resume when processing.  Partitioned data 
+/// may be persisted for long periods of time, allowing for data set usage that
+/// spans instances of processing.
+/// </summary>
+/// <typeparam name="T">Partition data item type.</typeparam>
 public partial class FilePartitioner<T> where T : class, new()
 {
-    private IFileReaderWriter<T> _fileReaderWriter;
+
+    #region # Public Properties
     public int MinIndex { get; set; } = 0;
     public int MaxIndex { get; set; } = 0;
-    public int NumberOfPartitions { get; set; } = 0;    
+    public int NumberOfPartitions { get; set; } = 0;
+    #endregion
+
+    #region # Private Properties
+    private IFileReaderWriter<T> _fileReaderWriter;
     private bool _universalBoundariesSet = false;
     private string _baseFileName;
     private string _baseDirectory;
     private string _fileExtension;
     private Dictionary<int, PartitionRecord> _partitionRecords = new();
+    private Regex _partitionFileNameRegex = new Regex(@".*_(?<minindex>\d*)_(?<maxindex>\d*)[.].*", RegexOptions.Compiled | RegexOptions.Singleline);
+    #endregion
 
+    /// <summary>
+    /// Constructor for instance of the file partitioner.
+    /// </summary>
+    /// <param name="fileReaderWriter">DI of file reader/writer implementation.</param>
+    /// <param name="baseDirectory">Directory where the all the partitioned data is persisted on disk.</param>
+    /// <param name="baseFileName">base file name for the partition data files (doesn't include the extension)</param>
+    /// <param name="fileExtension">file extension for the parition data files</param>
     public FilePartitioner(IFileReaderWriter<T> fileReaderWriter, string baseDirectory, string baseFileName, string fileExtension)
     {
         _fileReaderWriter = fileReaderWriter;
@@ -34,7 +55,13 @@ public partial class FilePartitioner<T> where T : class, new()
         return WritePartitions(data, data.Count());
     }
 
-    public PartitionActionStatus WritePartitions(IEnumerable<T> data, int boundarySize = 100_000)
+    /// <summary>
+    /// Write all partitions for a data set.  This also initializes this instance for reading partition data.
+    /// </summary>
+    /// <param name="data">Data set to partition according to the partitionSize</param>
+    /// <param name="partitionSize"></param>
+    /// <returns></returns>
+    public PartitionActionStatus WritePartitions(IEnumerable<T> data, int partitionSize = 100_000)
     {
         var writeResult = new PartitionActionStatus();
 
@@ -42,19 +69,21 @@ public partial class FilePartitioner<T> where T : class, new()
         {
             MinIndex = 0;
             MaxIndex = data.Count() - 1;
-            NumberOfPartitions = (int)Math.Ceiling((double)data.Count() / boundarySize);
+            NumberOfPartitions = (int)Math.Ceiling((double)data.Count() / partitionSize);
 
             for (int i = 0; i < NumberOfPartitions; i++)
             {
-                var paritionMinIndex = i * boundarySize;
-                var partitionMaxIndex = ((i + 1) * boundarySize) - 1;
+                var paritionMinIndex = i * partitionSize;
+                var partitionMaxIndex = ((i + 1) * partitionSize) - 1;
 
                 if (partitionMaxIndex > MaxIndex)
                     partitionMaxIndex = MaxIndex;
 
                 var filePath = GetPartitionFilePath(paritionMinIndex, partitionMaxIndex);
 
-                _fileReaderWriter.Write(data.Skip(boundarySize).Take(boundarySize).ToList(), filePath);
+                var partitionData = data.Skip(paritionMinIndex).Take(partitionMaxIndex - paritionMinIndex + 1).ToList();
+
+                _fileReaderWriter.Write(partitionData, filePath);
 
                 _partitionRecords.Add(i, new PartitionRecord {  MaxIndex = partitionMaxIndex, MinIndex = paritionMinIndex, Number = i });
             }
@@ -72,6 +101,11 @@ public partial class FilePartitioner<T> where T : class, new()
         return writeResult;
     }
 
+    /// <summary>
+    /// Read a partition number.  Zero based partition numbering.
+    /// </summary>
+    /// <param name="partitionNumber">Parition number to read.  Starting with 0.</param>
+    /// <returns>A partition read result with status of Success or Error/w/message.  If success then the data is returned for the partition.</returns>
     public PartitionReadResult<T> ReadPartition(int partitionNumber)
     {
         if(!_universalBoundariesSet)
@@ -95,8 +129,11 @@ public partial class FilePartitioner<T> where T : class, new()
         return $"{_baseDirectory.TrimEnd('\\')}\\{_baseFileName}_{minIndex}_{maxIndex}.{_fileExtension}";
     }
 
-    private Regex _partitionFileNameRegex = new Regex(@".*_(?<minindex>\d*)_(?<maxindex>\d*)[.].*", RegexOptions.Compiled | RegexOptions.Singleline);
 
+    /// <summary>
+    /// This can be run at anytime to refresh the partition records based on the data directory, file name base and extension.
+    /// </summary>
+    /// <exception cref="Exception"><inheritdoc cref="Exception"/></exception>
     private void ScanBaseDirectory()
     {
         var files = Directory.GetFiles(_baseDirectory, _baseFileName + "_*");
@@ -125,6 +162,7 @@ public partial class FilePartitioner<T> where T : class, new()
 
         _partitionRecords = partitionRecords.ToDictionary(i => i.Number, i => i);
 
+        NumberOfPartitions = partitionRecords.Count;
         MinIndex = _partitionRecords[0].MinIndex;
         MaxIndex = _partitionRecords[_partitionRecords.Count - 1].MaxIndex;
     }
