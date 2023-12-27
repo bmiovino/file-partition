@@ -42,7 +42,8 @@ var filebase = "data_set_type_name";
 var extension = "csv";
 
 //create a file partitioner of type Test Data, using the CSV reader writer implementation (based on CSVHelper)
-FilePartitioner<TestData> filePartitioner = new FilePartitioner.FilePartitioner<TestData>(new CsvFileReaderWriter<TestData>(), directory, filebase, extension);
+FilePartitioner<TestData> filePartitioner =
+  new FilePartitioner.FilePartitioner<TestData>(new CsvFileReaderWriter<TestData>(), directory, filebase, extension);
 
 var data = new List<TestData>();
 for(int i = 0; i < 100; i++)
@@ -53,7 +54,8 @@ var res = filePartitioner.WritePartitions(data, 9);
 
 ### Example Test Reader
 ```csharp
-FilePartitioner<TestData> filePartitionerReader = new FilePartitioner.FilePartitioner<TestData>(new CsvFileReaderWriter<TestData>(), directory, filebase, extension);
+FilePartitioner<TestData> filePartitionerReader =
+  new FilePartitioner.FilePartitioner<TestData>(new CsvFileReaderWriter<TestData>(), directory, filebase, extension);
 
 var readRes = new List<PartitionReadResult<TestData>?>();
 
