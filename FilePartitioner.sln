@@ -5,7 +5,14 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilePartitioner", "FilePartitioner\FilePartitioner.csproj", "{755733D4-BFB2-4DA8-A922-2F68FF26A872}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilePartitionerTest", "FilePartitionerTest\FilePartitionerTest.csproj", "{67342604-50A4-49B3-B8B6-69B353541A45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilePartitionerTest", "FilePartitionerTest\FilePartitionerTest.csproj", "{67342604-50A4-49B3-B8B6-69B353541A45}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{A3A33FDA-9A3A-4521-A9E0-382F76B717A3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{18FD6392-D5A7-4C37-9131-398DC0B9D6CF}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +31,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{18FD6392-D5A7-4C37-9131-398DC0B9D6CF} = {A3A33FDA-9A3A-4521-A9E0-382F76B717A3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3E13090A-52D1-4079-93BA-48E17E1F756C}

@@ -43,13 +43,19 @@ namespace FilePartitionerTest
         {
             #region #------------------------------- Assemble --------------------------------------#
 
-            var directory = @"C:\Temp\Test\FP1\";
+            //var directory = @"";
 
-            if (!Directory.Exists(directory))
-                Directory.CreateDirectory(directory);
+            //if (!Directory.Exists(directory))
+            //    Directory.CreateDirectory(directory);
+
+            var process = Process.GetCurrentProcess(); // Or whatever method you are using
+            string processPath = process.MainModule!.FileName!;
+
+            var processParts = processPath.Split('\\');
+            var directory = string.Join("\\", processParts.Take(processParts.Length - 1));
 
             //clean out the files
-            var files = Directory.GetFiles(directory);
+            var files = Directory.GetFiles(directory, "*.csv");
             foreach (var file in files)
             {
                 File.Delete(file);
