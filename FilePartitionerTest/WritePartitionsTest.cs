@@ -11,6 +11,9 @@ namespace FilePartitionerTest
         {
             var directory = @"C:\Temp\Test\FP1\";
 
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+            
             //clean out the files
             var files = Directory.GetFiles(directory);
             foreach(var file in files)
@@ -41,6 +44,9 @@ namespace FilePartitionerTest
             #region #------------------------------- Assemble --------------------------------------#
 
             var directory = @"C:\Temp\Test\FP1\";
+
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
 
             //clean out the files
             var files = Directory.GetFiles(directory);
@@ -90,38 +96,6 @@ namespace FilePartitionerTest
             }
 
             #endregion
-        }
-    }
-
-
-
-    public class TestData
-    {
-        private static Random random = new Random();
-
-        public TestData() { }
-
-        public TestData(int rowNumber)
-        {
-            RowNumber = rowNumber;
-            NumberA = random.Next(0, 100_000);
-            NumberB = random.Next(0, 100_000);
-        }
-        public int RowNumber { get; set; }
-        public int NumberA { get; set; }
-        public int NumberB { get; set; }
-    }
-
-    public class TestReadWrite : IFileReaderWriter<TestData>
-    {
-        public List<TestData> Read(string filepath)
-        {
-            return new List<TestData>();
-        }
-
-        public void Write(List<TestData> items, string filepath)
-        {
-            return;
         }
     }
 }
