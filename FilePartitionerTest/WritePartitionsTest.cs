@@ -57,13 +57,14 @@ namespace FilePartitionerTest
 
             //clean out the files
             if (directory != "")
+                directory = processPath;
+
+            var files = Directory.GetFiles(directory, "*.csv");
+            foreach (var file in files)
             {
-                var files = Directory.GetFiles(directory, "*.csv");
-                foreach (var file in files)
-                {
-                    File.Delete(file);
-                }
+                File.Delete(file);
             }
+            
 
             var filebase = "file";
 
