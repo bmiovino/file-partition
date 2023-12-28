@@ -56,7 +56,7 @@ namespace FilePartitionerTest
             var directory = string.Join("\\", processParts.Take(processParts.Length - 1));
 
             //clean out the files
-            if (directory != "")
+            if (directory == "")
                 directory = processPath;
 
             var files = Directory.GetFiles(directory, "*.csv");
