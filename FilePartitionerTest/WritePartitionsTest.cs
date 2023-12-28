@@ -52,7 +52,7 @@ namespace FilePartitionerTest
             string processPath = process.MainModule!.FileName!;
 
             var processParts = processPath.Split('\\');
-            Debug.WriteLine("Process Path " + processPath);
+            Console.WriteLine("Process Path " + processPath);
             var directory = string.Join("\\", processParts.Take(processParts.Length - 1));
 
             //clean out the files
