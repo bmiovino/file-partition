@@ -56,12 +56,9 @@ namespace FilePartitionerTest
             var directory = string.Join("\\", processParts.Take(processParts.Length - 1));
 
             //clean out the files
-            if (directory == "" && directory.Contains('/'))
-            {
-                processParts = processPath.Split('/');
-                directory = string.Join("/", processParts.Take(processParts.Length - 1));
-            }
-
+            if (directory == "")
+                directory = @"/usr/share/dotnet/";
+            
             var files = Directory.GetFiles(directory, "*.csv");
             foreach (var file in files)
             {
