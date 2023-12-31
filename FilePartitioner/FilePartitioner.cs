@@ -50,6 +50,20 @@ public partial class FilePartitioner<T> where T : class, new()
         _fileExtension = fileExtension;
     }
 
+    /// <summary>
+    /// Constructor that implements the Csv Reader Writer based on CsvHelper.
+    /// </summary>
+    /// <param name="baseDirectory">Directory where the all the partitioned data is persisted on disk.</param>
+    /// <param name="baseFileName">base file name for the partition data files (doesn't include the extension)</param>
+    /// <param name="fileExtension">file extension for the parition data files</param>
+    public FilePartitioner(string baseDirectory, string baseFileName, string fileExtension)
+    {
+        _fileReaderWriter = new CsvFileReaderWriter<T>();
+        _baseFileName = baseFileName;
+        _baseDirectory = baseDirectory;
+        _fileExtension = fileExtension;
+    }
+
     public PartitionActionStatus WriteSinglePartition(IEnumerable<T> data)
     {
         return WritePartitions(data, data.Count());
