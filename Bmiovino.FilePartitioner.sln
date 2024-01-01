@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilePartitioner", "FilePartitioner\FilePartitioner.csproj", "{755733D4-BFB2-4DA8-A922-2F68FF26A872}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bmiovino.FilePartitioner.Lib", "Bmiovino.FilePartitioner.Lib\Bmiovino.FilePartitioner.Lib.csproj", "{755733D4-BFB2-4DA8-A922-2F68FF26A872}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilePartitionerTest", "FilePartitionerTest\FilePartitionerTest.csproj", "{67342604-50A4-49B3-B8B6-69B353541A45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bmiovino.FilePartitioner.Lib.Test", "Bmiovino.FilePartitioner.Lib.Test\Bmiovino.FilePartitioner.Lib.Test.csproj", "{67342604-50A4-49B3-B8B6-69B353541A45}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{A3A33FDA-9A3A-4521-A9E0-382F76B717A3}"
 EndProject
