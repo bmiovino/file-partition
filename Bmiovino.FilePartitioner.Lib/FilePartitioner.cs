@@ -135,14 +135,13 @@ public partial class FilePartitioner<T> where T : class, new()
         var partitionRecordFilePath = GetPartitionFilePath(partitionRecord.MinIndex, partitionRecord.MaxIndex);
         var data = _fileReaderWriter.Read(partitionRecordFilePath);
 
-        return new PartitionReadResult<T>(PartitionActionStatus.ParitionStatusEnum.Success, "") { Data = data };
+        return new PartitionReadResult<T>(PartitionActionStatus.ParitionStatusEnum.Success, "") { Data = data, PartitionRecord = partitionRecord };
     }
 
     public string GetPartitionFilePath(int minIndex, int maxIndex)
     {
         return $"{_baseDirectory.TrimEnd('\\')}\\{_baseFileName}_{minIndex}_{maxIndex}.{_fileExtension}";
     }
-
 
     /// <summary>
     /// This can be run at anytime to refresh the partition records based on the data directory, file name base and extension.
