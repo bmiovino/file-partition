@@ -64,6 +64,24 @@ public partial class FilePartitioner<T> where T : class, new()
         _fileExtension = fileExtension;
     }
 
+    /// <summary>
+    /// Writes a single partition to an offset.  Used for incremental building of partitions in data overall data set.
+    /// Note: this will not retain the correct partition numbers and min / max indexes.  It will only have the state from
+    /// the last writing of a single partition.
+    /// </summary>
+    /// <param name="data"><inheritdoc cref="IEnumerable{T}"/></param>
+    /// <param name="indexOffset">Integer offset - inclusive.</param>
+    /// <returns><inheritdoc cref="PartitionActionStatus"/></returns>
+    public PartitionActionStatus WriteSinglePartition(IEnumerable<T> data, int indexOffset)
+    {
+        return WritePartitions(data, data.Count(), indexOffset);
+    }
+
+    /// <summary>
+    /// Writes a single partition.
+    /// </summary>
+    /// <param name="data"><inheritdoc cref="IEnumerable{T}"/></param>
+    /// <returns><inheritdoc cref="PartitionActionStatus"/></returns>
     public PartitionActionStatus WriteSinglePartition(IEnumerable<T> data)
     {
         return WritePartitions(data, data.Count());
@@ -75,31 +93,32 @@ public partial class FilePartitioner<T> where T : class, new()
     /// <param name="data">Data set to partition according to the partitionSize</param>
     /// <param name="partitionSize"></param>
     /// <returns></returns>
-    public PartitionActionStatus WritePartitions(IEnumerable<T> data, int partitionSize = 100_000)
+    public PartitionActionStatus WritePartitions(IEnumerable<T> data, int partitionSize = 100_000, int indexOffset = 0)
     {
         var writeResult = new PartitionActionStatus();
 
         try
         {
-            MinIndex = 0;
-            MaxIndex = data.Count() - 1;
+            MinIndex = 0 + indexOffset;
+            MaxIndex = data.Count() - 1 + indexOffset;
             NumberOfPartitions = (int)Math.Ceiling((double)data.Count() / partitionSize);
 
             for (int i = 0; i < NumberOfPartitions; i++)
             {
-                var paritionMinIndex = i * partitionSize;
-                var partitionMaxIndex = ((i + 1) * partitionSize) - 1;
+                var paritionMinIndex = (i * partitionSize) + indexOffset;
+                var partitionMaxIndex = (((i + 1) * partitionSize) - 1) + indexOffset;
 
                 if (partitionMaxIndex > MaxIndex)
                     partitionMaxIndex = MaxIndex;
 
                 var filePath = GetPartitionFilePath(paritionMinIndex, partitionMaxIndex);
 
-                var partitionData = data.Skip(paritionMinIndex).Take(partitionMaxIndex - paritionMinIndex + 1).ToList();
+                var partitionData = data.Skip(paritionMinIndex - indexOffset).Take(partitionMaxIndex - paritionMinIndex + 1).ToList();
 
                 _fileReaderWriter.Write(partitionData, filePath);
 
-                _partitionRecords.Add(i, new PartitionRecord {  MaxIndex = partitionMaxIndex, MinIndex = paritionMinIndex, Number = i });
+                if(!_partitionRecords.ContainsKey(i))
+                    _partitionRecords.Add(i, new PartitionRecord {  MaxIndex = partitionMaxIndex, MinIndex = paritionMinIndex, Number = i });
             }
 
             _universalBoundariesSet = true;
